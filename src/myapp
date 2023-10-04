@@ -1,0 +1,28 @@
+from flask import Flask, request, Response
+from twilio.twiml.messaging_response import MessagingResponse
+
+app = Flask(__name__)
+
+# Replace with your personal phone number
+MY_PHONE_NUMBER = "+14355228091"
+
+@app.route('/sms', methods=['POST'])
+def sms_forward():
+    # Get the message details
+    msg_from = request.values.get('From', None)
+    msg_body = request.values.get('Body', None)
+    msg_media = request.values.get('NumMedia', None)
+
+    # Create a TwiML response
+    resp = MessagingResponse()
+    message = resp.message(f"From {msg_from}: {msg_body}", to=MY_PHONE_NUMBER, from_="+14359195447")
+
+    # Add media (MMS) if there is any
+    if int(msg_media) > 0:
+        for num in range(int(msg_media)):
+            message.media(request.values.get(f'MediaUrl{num}', None))
+            
+    return str(resp)
+
+if __name__ == '__main__':
+    app.run(debug=True)
